@@ -1,5 +1,5 @@
-"""Timetable PDF -> SQLite. Keeps what the recommender needs: courses (code, title,
-units), sections (cancelled flag, day-hour slots, exam dates, raw text) and the
+"""Timetable PDF to sqlite, keeps : courses (code, title, units), 
+sections (cancelled flag, day-hour slots, exam dates, raw text),
 equivalent-courses table.
 
     python timetable.py data/raw/timetable.pdf data/processed/academic.db
@@ -20,7 +20,7 @@ HEADER = {"CREDIT", "MIDSEM", "COMPRE", "SESSION", "DATE &", "COM", "H", "U/C", 
 
 
 def read_lines(pdf_path):
-    """Return (course-page lines, equivalents-page lines), without headers and page numbers."""
+    #Return (course-page lines, equivalents-page lines), without headers and page numbers.
     course_lines, equiv_lines, in_equiv = [], [], False
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
@@ -39,8 +39,8 @@ def read_lines(pdf_path):
 
 
 def glue(lines):
-    """One string per course/section row: a line that doesn't start a new row is a
-    wrapped piece of the row above, so it is glued back on."""
+    #One string per course/section row: a line that doesn't start a new row is a
+    #wrapped piece of the row above, so it is glued back on.
     rows = []
     for line in lines:
         if COURSE_START.match(line) or SECTION.match(line) or not rows:
@@ -51,7 +51,7 @@ def glue(lines):
 
 
 def parse_slots(text):
-    """'M W 4 T 10' -> [('M',4),('W',4),('T',10)]  (uses the last day/hour run in the text)"""
+    #M W 4 T 10' -> [('M',4),('W',4),('T',10)]  (uses the last day/hour run in the text)
     found = SLOTS.findall(text)
     slots, days, last_num = [], [], False
     for tok in (found[-1].split() if found else []):
@@ -71,8 +71,8 @@ def parse_section(comp, code, label, rest):
 
 
 def parse(rows):
-    """Returns (courses, sections, problems). Rows that can't be parsed are reported,
-    and their sections are skipped rather than attached to the wrong course."""
+    #Returns (courses, sections, problems). Rows that can't be parsed are reported,
+    #and their sections are skipped rather than attached to the wrong course.
     courses, sections, problems, comp, code = {}, [], [], None, None
     for row in rows:
         if m := COURSE.match(row):
@@ -91,7 +91,7 @@ def parse(rows):
 
 
 def parse_equivalents(lines):
-    """'CS F213 OBJECT ORIENTED PROG IS C313 IS F213 ...' -> [('CS F213','IS C313'), ...]"""
+    #CS F213 OBJECT ORIENTED PROG IS C313 IS F213 ...' -> [('CS F213','IS C313'), ...]
     pairs = []
     for line in lines:
         codes = CODE.findall(line)

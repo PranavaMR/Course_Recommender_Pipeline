@@ -1,7 +1,8 @@
 """Course handout PDFs -> one row per course in SQLite, plus a review CSV.
 
-Rule-based only. Anything the rules can't decide is left as "unknown" and the
-handout is listed in the review CSV (these are the ones to send to the AI fallback).
+rule-based only so anything the rules can't decide is left as "unknown" and the
+handout is listed in the review CSV ( i will use AI to parse these later ), this will 
+be one of the limitations...
 
     python handouts.py data/raw/handouts data/processed/academic.db
 """
@@ -22,7 +23,6 @@ HEADINGS = {
 }
 HEADING = re.compile(r"^\s*(?:\d{1,2}\s*\.|[a-z]\))?\s*(" + "|".join(HEADINGS.values()) + r")\s*(?::|$)", re.I | re.M)
 
-# Evaluation component types. The keyword appearing first in a row's name wins (see kind_of).
 KINDS = [
     ("midsem", r"mid[\s-]*sem|mid[\s-]*term"),
     ("compre", r"compre"),
@@ -48,7 +48,7 @@ def read_text(pdf_path):
 
 
 def split_sections(text):
-    """{'evaluation': '...', 'makeup': '...', ...} - text between one heading and the next."""
+    #{'evaluation': '...', 'makeup': '...', ...} - text between one heading and the next.
     hits = list(HEADING.finditer(text))
     sections = {}
     for i, m in enumerate(hits):
@@ -86,7 +86,7 @@ def weight(line):
 
 
 def parse_evaluation(section):
-    """Returns (components, weights_ok, total). Weights given as marks are converted to %."""
+    #Returns (components, weights_ok, total). Weights given as marks are converted to %.
     lines = [ln for ln in section.splitlines()[1:]
              if len(ln.split()) <= 18 and not re.search(r"[a-z]{3,}\. [A-Z]", ln)]   # skip prose sentences
     components = []
@@ -185,7 +185,7 @@ def parse_handout(pdf_path):
 
 
 def add_topics(rows, n=10):
-    """Top-n TF-IDF keywords per course from its description + course plan."""
+    #Top-n TF-IDF keywords per course from its description + course plan.
     docs = [r["topic_text"] or r["code"] for r in rows]
     noise = ["chapter", "chapters", "chs", "vol", "web", "resources", "lecture", "lectures", "module", "week",
              "text", "book", "reference", "notes", "class", "understanding", "introduction", "course", "students"]
